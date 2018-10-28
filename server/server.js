@@ -19,6 +19,24 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 //Routes
+
+app.post('/logIng', (req, res) => {
+  
+    var email = req.body.email;
+    var password = req.body.password;
+  
+    const db = require('./DB.js');
+    db.query('SELECT *FROM USER WHERE EMAIL =? AND PASSWORD = ?', [email, password], function (error, results, fields) {
+        if (error) throw error; 
+        if(results[0]== undefined){
+          res.send('Usuario invalido')
+        }else{
+            res.json(results[0])
+        }
+          
+        
+      });
+    });
 userRoutes = require('./routes/user.js');
 app.use('/user', userRoutes);
 

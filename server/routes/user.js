@@ -1,21 +1,20 @@
-const institucionRoutes = require('express').Router();
+const user = require('express').Router();
 
-institucionRoutes.route('/').get((req, res)=>{
-    // var email = req.body.email;
-    // var password = req.body.password;
-  
-    const db = require('../DB.js');
-    // var sql = 'CALL LogIn(?,?)';
-    db.query('SELECT *FROM USER', function (error, results, fields) {
-        if (error) throw error; 
-        if(results == undefined){
-          res.send('Usuario invalido')
-        }else{
-            res.json(results)
-        }   
-      });
+user.route('/').post((req, res)=>{
+
+    console.log(req.body)
+
+    // const db = require('../DB.js');
+    // db.query('SELECT *FROM USER WHERE EMAIL = ? AND PASSWORD = ?', [email, password], function (error, results, fields) {
+    //     if (error) throw error; 
+    //     if(results == undefined){
+    //       res.send('Usuario invalido')
+    //     }else{
+    //         console.log(results)
+    //     }   
+    //   });
 
 });
 
 
-module.exports = institucionRoutes;
+module.exports = user;
