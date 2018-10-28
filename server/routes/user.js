@@ -1,17 +1,19 @@
 const institucionRoutes = require('express').Router();
 
 institucionRoutes.route('/').get((req, res)=>{
-
-
-
-    var data = [
-        {Nombre: 'Anderson', Edad: 24},
-        {Nombre: 'Fernando', Edad: 29},
-        {Nombre: 'Andy', Edad: 23},
-    ];
-
-    res.json(data);
-
+    // var email = req.body.email;
+    // var password = req.body.password;
+  
+    const db = require('../DB.js');
+    // var sql = 'CALL LogIn(?,?)';
+    db.query('SELECT *FROM USER', function (error, results, fields) {
+        if (error) throw error; 
+        if(results == undefined){
+          res.send('Usuario invalido')
+        }else{
+            res.json(results)
+        }   
+      });
 
 });
 

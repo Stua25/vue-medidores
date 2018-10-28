@@ -4,29 +4,18 @@
     <h2>Esto es un segundo texto</h2>
     <h2>{{obj.Nombre}}</h2>
     <h2>{{objArray[1].Nombre}}</h2>
-    <h2>{{users[0].Edad}}</h2>
 
-  <!-- <div class="container">
-    <table class="table">
-      <thead>
-        <tr>
-          <th scope="col">No.</th>
-          <th scope="col">Nombre</th>
-          <th scope="col">Edad</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(value,key) in users" v-bind:key="key">
-          <td>{{key}}</td>
-          <td>{{value.Nombre}}</td>
-          <td>{{value.Edad}}</td>
-        </tr>
-      </tbody>
-
-    </table>
-
-  </div> -->
-
+    <button class="button is-primary" @click="changeValue">Cambiar Edad</button>
+    <b-table :data="users">
+      <template slote-scope="props">
+        <b-table-column label="#">
+          {{props.index}}
+        </b-table-column>
+        <b-table-column label="Nombre">
+          {{props.row.NOMBRE}}
+        </b-table-column>
+      </template>
+    </b-table>
 
   </div>
 </template>
@@ -35,9 +24,7 @@
 export default {
   data(){
     return{
-      users: [
-        {Edad: 0,Nombre: ''}
-      ],
+      users: [],
       obj: {
         Nombre: "Esto es un Nombre dentro de Un objeto"
       }, 
@@ -56,20 +43,17 @@ export default {
     getUsers(){
       let uri = 'http://localhost:4000/user';
           this.axios.get(uri).then((response) => {
-            var data = JSON.stringify(response.data);
-            var converted = JSON.parse(data);
-            this.users = converted;
-
-              
-              
+            this.users = response.data;   
         });
+    }, 
+    changeValue(){
+      this.users[0].Edad += 50
     }
     
   }, 
 
   created(){
     this.getUsers();
-
   }
   
 }
