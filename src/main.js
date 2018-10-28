@@ -4,6 +4,14 @@ import router from './router'
 import store from './store'
 import './registerServiceWorker'
 
+import Buefy from 'buefy'
+import 'buefy/dist/buefy.css'
+Vue.use(Buefy);
+
+import axios from 'axios';
+import VueAxios from 'vue-axios';
+Vue.use(VueAxios, axios);
+
 Vue.config.productionTip = false
 
 new Vue({
