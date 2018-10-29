@@ -15,7 +15,7 @@
                         <input type="password" class="form-control" id="exampleInputPassword1" name="password" placeholder="Ingrese su Contraseña" required>
                     </div>
                     <p style="text-align: center">
-                        <b-button type="submit" variant="primary">Submit</b-button>                       
+                        <b-button type="submit" variant="primary">Ingresar</b-button>                       
                         <!-- <v-ons-button modifier="large" style="margin: 6px 0" type="submit">
                             <router-link :to="{ name: 'InstitucionesHome' }" class="btn btn-primary">
                                 Instituciones
