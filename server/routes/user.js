@@ -1,8 +1,8 @@
 const user = require('express').Router();
 
-user.route('/').post((req, res)=>{
+user.route('/eliminar').post((req, res)=>{
 
-    console.log(req.body)
+   res.send('A eliminar usuario');
 
     // const db = require('../DB.js');
     // db.query('SELECT *FROM USER WHERE EMAIL = ? AND PASSWORD = ?', [email, password], function (error, results, fields) {

@@ -26,7 +26,10 @@ export default new Router({
     {
       path: '/inicio',
       name: 'inicio',
-      component: () => import(/* webpackChunkName: "inicio" */'./views/Inicio.vue')
+      component: () => import(/* webpackChunkName: "inicio" */'./views/Inicio.vue'),
+      meta: { 
+        requiresAuth: true
+      }
     }
   ]
 })
