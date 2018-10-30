@@ -47,12 +47,12 @@ app.post('/logIng', (req, res) => {
     db.query('SELECT *FROM USER WHERE EMAIL =? AND PASSWORD = ?', [email, password], function (error, results, fields) {
         if (error) throw error; 
         if(results[0]== undefined){
-          res.redirect('http://localhost:8080')
+          res.redirect('http://192.168.0.3:8080')
         }else{
             const user_id = results[0].ID_USER
             console.log(user_id);
             req.login(user_id, function (err) {             
-                res.redirect('http://localhost:8080/inicio')
+                res.redirect('http://192.168.0.3:8080/inicio')
             });
         } 
       });
