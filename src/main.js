@@ -4,6 +4,12 @@ import router from './router'
 import store from './store'
 import './registerServiceWorker'
 
+import VueSession from 'vue-session'
+Vue.use(VueSession)
+
+import VueResource from  'vue-resource'
+Vue.use(VueResource);
+
 import Buefy from 'buefy'
 import 'buefy/dist/buefy.css'
 Vue.use(Buefy);
