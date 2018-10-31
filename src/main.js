@@ -14,11 +14,11 @@ var VueResource = require('vue-resource');
 Vue.use(VueResource);
 
 
-import BootstrapVue from 'bootstrap-vue'
-Vue.use(BootstrapVue);
+// import BootstrapVue from 'bootstrap-vue'
+// Vue.use(BootstrapVue);
 
-import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap-vue/dist/bootstrap-vue.css'
+// import 'bootstrap/dist/css/bootstrap.css'
+// import 'bootstrap-vue/dist/bootstrap-vue.css'
 
 import Buefy from 'buefy'
 import 'buefy/dist/buefy.css'
