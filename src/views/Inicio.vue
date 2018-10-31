@@ -34,6 +34,10 @@
                     </b-col>
                     <b-col></b-col>
                 </b-row>
+
+                <b-row>
+
+                </b-row>
             </b-container>
         </b-jumbotron>
 
@@ -48,11 +52,37 @@ export default {
         return{
             user: {
                 codigoUsuario: 0, 
-                Nombre: 'Victor Estrada', 
-                Rol: 'Director Ejecutivo',
+                Nombre: '', 
+                Rol: '',
             }, 
 
             year: 0,
+        }
+    },
+
+    beforeCreate: function () {
+
+        var logged= this.$session.exists();
+        if (!logged) {
+            this.$router.push('/');
+            this.$parent.islogged = false;
+        }
+        this.$parent.islogged = true;
+    },
+    created(){
+        this.user.Nombre = this.$session.get('Usuario');
+        this.user.codigoUsuario = this.$session.get('id_usuario');
+        this.user.Rol = this.$session.get('Rol');
+
+        
+    }, 
+
+    watch:{
+        year:{
+            handler: function(){
+                this.$session.set('Year', this.year)
+            }
+            
         }
     }
     

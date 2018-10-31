@@ -1,12 +1,38 @@
 <template>
   <div id="app">
     <div id="nav">
-      <router-link to="/">Inicio</router-link> |
-      <router-link to="/about">About</router-link>
+      <router-link to="/">Inicio</router-link> 
+      <span v-show="islogged" @click="logOut"><b>| Salir</b></span>
     </div>
     <router-view/>
   </div>
 </template>
+
+<script>
+export default {
+  data(){
+    return{
+      islogged: false,
+    }
+  }, 
+
+  methods:{
+    logOut(){
+      this.$session.destroy()
+      this.$router.push('/')
+      this.islogged = false;
+    }
+  },
+
+  created() {   
+    this.islogged = this.$session.exists();
+  },
+
+  
+
+}
+</script>
+
 
 <style lang="scss">
 #app {

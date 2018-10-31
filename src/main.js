@@ -4,21 +4,25 @@ import router from './router'
 import store from './store'
 import './registerServiceWorker'
 
-import VueSession from 'vue-session'
+// import VueSession from 'vue-session'
+// Vue.use(VueSession)
+
+var VueSession = require('vue-session')
 Vue.use(VueSession)
 
-import VueResource from  'vue-resource'
+var VueResource = require('vue-resource');
 Vue.use(VueResource);
 
-import Buefy from 'buefy'
-import 'buefy/dist/buefy.css'
-Vue.use(Buefy);
 
 import BootstrapVue from 'bootstrap-vue'
 Vue.use(BootstrapVue);
 
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
+
+import Buefy from 'buefy'
+import 'buefy/dist/buefy.css'
+Vue.use(Buefy);
 
 import axios from 'axios';
 import VueAxios from 'vue-axios';
