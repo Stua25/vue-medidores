@@ -26,10 +26,20 @@ export default new Router({
     {
       path: '/inicio',
       name: 'inicio',
-      component: () => import(/* webpackChunkName: "inicio" */'./views/Inicio.vue'),
+      component: () => import(/* webpackChunkName: "inicio" */ './views/Inicio.vue'),
       meta: { 
         requiresAuth: true
       }
+    }, 
+    {
+      path: '/indicadores',
+      name: 'indicadores',
+      component: () => import(/* webpackChunkName: "indicadores" */ './views/Indicador.vue')
+    }, 
+    {
+      path: '/indicador/I03',
+      name: 'IO3',
+      component: () => import(/* webpackChunkName: "indicadores" */ './views/Indicadores/I03')
     }
   ]
 })

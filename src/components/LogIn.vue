@@ -66,12 +66,12 @@ export default {
     
         ingresar(){
           var scope = this
-          this.$http.post('http://localhost:4000/logIng', 
+          this.$http.post('http://192.168.1.20:4000/logIng', 
           {
             user: this.form.email, 
             password: this.form.password
             }).then(function(response){
-              debugger
+              
               if(response.data.length == 0 || response.data == undefined){
                 scope.isImageModalActive = true;
               } else{
@@ -106,7 +106,7 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped lang="scss">
+<style scoped >
 h1{
   font-size: 250%;
   color:rgba(0, 0, 0, 0.726);
@@ -125,6 +125,18 @@ li {
 a {
   color: #1b252780;
 }
+body{
+  background-image: url('../assets/lake.jpg');
+
+  height: 100%; 
+  width: 100%;
+
+  /* Center and scale the image nicely */
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
 
 
 .notification{

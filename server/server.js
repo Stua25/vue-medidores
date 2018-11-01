@@ -4,6 +4,7 @@ bodyParser = require('body-parser'),
 cors = require('cors');
 
 
+
 const app = express();
 var port = process.env.PORT || 4000;
 
@@ -63,6 +64,9 @@ passport.deserializeUser(function(user_id, done){
 
 userRoutes = require('./routes/user.js');
 app.use('/user', userRoutes);
+
+var API = require('./API.js');
+app.use('/api', API);
 
 var server = app.listen(port, function(){
     console.log('Listening on port ' + port);

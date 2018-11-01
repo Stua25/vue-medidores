@@ -41,7 +41,7 @@ export default {
 
   methods: {
     getUsers(){
-      let uri = 'http://localhost:4000/user';
+      let uri = 'http://192.168.1.20:4000/user';
           this.axios.get(uri).then((response) => {
             this.users = response.data;   
         });

@@ -22,19 +22,18 @@ export default {
     height: 100%;
     width: 100%;
     margin: 0;
-  }
-
- #app {
+    
     background-image: url('../assets/lake.jpg');
-
-    height: 100%; 
-    width: 100%;
-
     /* Center and scale the image nicely */
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
   }
+
+
+   body{
+   }
+
 
   img{
     width: 10%;
