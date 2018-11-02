@@ -37,9 +37,14 @@ export default new Router({
       component: () => import(/* webpackChunkName: "indicadores" */ './views/Indicador.vue')
     }, 
     {
-      path: '/indicador/I03',
-      name: 'IO3',
-      component: () => import(/* webpackChunkName: "indicadores" */ './views/Indicadores/I03')
+      path: '/indicador/I01',
+      name: 'IO1',
+      component: () => import(/* webpackChunkName: "indicadores" */ './views/Indicadores/I01')
+    }, 
+    {
+      path: '/indicador/I02',
+      name: 'IO2',
+      component: () => import(/* webpackChunkName: "indicadores" */ './views/Indicadores/I02')
     }
   ]
 })

@@ -48,7 +48,7 @@
             </div>
             <div class="columns is-mobile">
                 <div class="column  column is-11 is-offset-1">
-                    <b-select @input="changeMonth"
+                    <b-select @input="changeDepartamento"
                         placeholder="Seleccione Un Departamento"
                         style="display: -webkit-inline-box;"
                         v-model="departamentoSelected"
@@ -62,7 +62,7 @@
                 </div>
             </div> 
 
-            <div class="columns is-mobile" v-for="distrito in Distritos" 
+            <div v-if="mostrarDistritos" class="columns is-mobile" v-for="distrito in Distritos" 
                     :value="distrito.Correlativo" 
                     :key="distrito.Correlativo">
                 <div class="column is-11 is-offset-1">
@@ -73,11 +73,35 @@
 
                     <div class="columns is-mobile">
                         <div class="column is-half is-offset-one-quarter">
-                            s
+                            {{medidor.Descripcion}}
+                            <b-input v-model="distrito.numeroPlazas"></b-input>
                         </div>
-                    </div>                   
+                    </div> 
+                    <div class="columns is-mobile">
+                        <div class="column is-half is-offset-one-quarter">
+                            <b-field label="Numero total de Plazas de trabajo del SINAE">
+                                <b-input v-model="distrito.total" disabled></b-input>
+                            </b-field>
+                        </div>
+                    </div>
+                    <div class="columns is-mobile">
+                        <div class="column is-half is-offset-one-quarter">
+                            <a class="button is-rounded" @click="saveData(distrito.Correlativo, distrito.numeroPlazas, medidor.id_medidor, periodoSelected, distrito.total)">Guardar</a>
+                        </div>
+                    </div>                    
                 </div>
-            </div>           
+            </div> 
+            <div class="columns is-mobile">
+                <div class="column is-11 is-offset-1">
+                   <form enctype="multipart/form-data">
+                            <label>
+                                <font-awesome-icon icon="file-upload" />&nbsp;Seleccionar un archivo
+                                <input  type="file" accept=".pdf" @change="onFileSelected($event)">
+                            </label>
+                    </form>
+                </div>
+            </div>
+
         </div>
     </div>
  </div>
@@ -100,11 +124,40 @@ export default {
             Departamentos: [],
             departamentoSelected: 0,
             Distritos: [],
+            medidor: [],
+            fileToUpload: '',
+            mostrarDistritos: false,
 
         }
     }, 
 
     methods: {
+        saveData(idDistrito, numeroPlaza, id_medidor, periodo, total){
+            var dataToSave = {
+                distrito: idDistrito,
+                numeroPlaza: numeroPlaza,
+                medidor: id_medidor,
+                periodo: periodo,
+            }
+           if(numeroPlaza >= total){
+            alert("El Numero de plaza es mayor al total de las plazas")
+           }
+
+           this.$http.post('http://192.168.1.20:4000/api/saveNumPlaza', 
+           {
+               dataToSave: dataToSave
+           }).then(function(response){
+               if(response.data.length == 0 || response.data == undefined){
+
+               } else{
+                   var notification = response.data;
+                    debugger
+               }
+
+           })
+
+        },
+
         getDepartamentos(){
             var scope = this;
             this.$http.post('http://192.168.1.20:4000/api/departamentos', 
@@ -119,7 +172,27 @@ export default {
             })
         }, 
 
-        changeMonth(){
+        
+        getMedidores(){
+            var scope = this;
+            var indicador = this.$session.get('Indicador');
+            debugger
+            this.$http.post('http://192.168.1.20:4000/api/medidores', 
+            {
+                id_Indicador: indicador.id_Indicador
+            }).then(function(response){
+                if(response.data.length == 0 || response.data == undefined){
+
+                } else{
+                        
+                    scope.medidor = response.data[0]; 
+                    
+                    debugger
+                }
+            })
+        }, 
+
+        changeDepartamento(){
             var scope = this;
             debugger
             this.$http.post('http://192.168.1.20:4000/api/distrito',
@@ -127,14 +200,33 @@ export default {
                 Id_Departamento: this.departamentoSelected
             }).then(function(response){
                 if(response.data.length == 0 || response.data == undefined){
+                    scope.mostrarDistritos =false;
 
                 } else{
-                    scope.Distritos = response.data;   
-                    debugger                     
+                    scope.mostrarDistritos = true;
+                    scope.Distritos = response.data;                    
                 }
             });
 
         },
+
+        onFileSelected (event) {
+            const file = event.target.files[0];
+
+            
+            debugger
+            //const formData = new FormData();
+            //formData.append("my-file", file);
+            this.$http.post('http://192.168.1.20:4000/api/upload', file)
+            .then(function(response) {
+                 
+                    debugger
+                
+            })
+        },
+
+
+        
     }, 
 
     beforeCreate(){
@@ -170,16 +262,35 @@ export default {
             break;
         }
         this.getDepartamentos();
+        this.getMedidores();
 
     },
 
     watch: {
+        periodoSelected: {
+            handler: function(evt){
+                this.$session.set('Trimestre', periodoSelected);
+            }
+        }
 
     }
 }
 </script>
 
 <style>
+
+  #app{
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    
+    background-image: url('../../assets/lake.jpg');
+    /* Center and scale the image nicely */
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
 .field{
     display: '-webkit-inline-box';
 }
