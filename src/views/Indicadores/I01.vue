@@ -4,6 +4,11 @@
         <div class="notification">
             <div class="columns is-mobile">
                 <div class="column  column is-11 is-offset-1">
+                      <div class="level-left">
+                        <div class="level-item" style="font-size: 200%" @click="goBack">
+                            <font-awesome-icon icon="chevron-circle-left" style="margin-right: 15px; display: inline"/> 
+                        </div>
+                    </div>
                     <span style="font-size: 150%" >{{user.Rol}}</span> 
                     <p style="font-size: 150%;">
                         {{user.Nombre}}                      
@@ -25,22 +30,26 @@
 
                     <b-field style="display: -webkit-inline-box;">
                         <b-radio-button v-model="periodoSelected"
-                        native-value="1">
+                        native-value="1"
+                        @click="getSavedData">
                             <span>1</span>
                         </b-radio-button>
 
                         <b-radio-button v-model="periodoSelected"
-                        native-value="2">        
+                        native-value="2"
+                        @click="getSavedData">        
                             <span>2</span>
                         </b-radio-button>
 
                         <b-radio-button v-model="periodoSelected"
-                        native-value="3">
+                        native-value="3"
+                        @click="getSavedData">
                             <span>3</span>
                         </b-radio-button>
 
                         <b-radio-button v-model="periodoSelected"
-                        native-value="4">
+                        native-value="4"
+                        @click="getSavedData">
                             <span>4</span>
                         </b-radio-button>
                     </b-field>
@@ -74,7 +83,7 @@
                     <div class="columns is-mobile">
                         <div class="column is-half is-offset-one-quarter">
                             {{medidor.Descripcion}}
-                            <b-input v-model="distrito.numeroPlazas"></b-input>
+                            <b-input v-model="distrito.numeroPlazas" :readonly="!distrito.canEdit"></b-input>
                         </div>
                     </div> 
                     <div class="columns is-mobile">
@@ -132,16 +141,30 @@ export default {
     }, 
 
     methods: {
+
+        goBack(){
+            this.$router.push('/indicadores')
+        },
         saveData(idDistrito, numeroPlaza, id_medidor, periodo, total){
             var dataToSave = {
                 distrito: idDistrito,
                 numeroPlaza: numeroPlaza,
                 medidor: id_medidor,
                 periodo: periodo,
+                User: this.$session.get('id_usuario'),
+                departamento: this.$session.get('departamento')
             }
            if(numeroPlaza >= total){
-            alert("El Numero de plaza es mayor al total de las plazas")
+            alert("El Numero de plaza es mayor al total de las plazas");
+                return;
            }
+
+           if(this.periodoSelected == 0 ){
+               alert("No se selecciono el trimestre");
+               return;
+           } 
+
+           
 
            this.$http.post('http://192.168.1.20:4000/api/saveNumPlaza', 
            {
@@ -151,11 +174,43 @@ export default {
 
                } else{
                    var notification = response.data;
-                    debugger
+                    
                }
 
            })
+        
+        },
 
+        getSavedData(){
+            var scope = this;
+            var indicador = this.$session.get('Indicador')
+            var data = {
+                indicador: indicador.id_Indicador,
+                trimestre: parseInt(this.$session.get('Trimestre')),
+                user: this.$session.get('id_usuario'), 
+                departamento: this.$session.get('departamento')
+            }
+            this.$http.post('http://192.168.1.20:4000/api/savedNumPlaza', 
+           {
+               data: data
+           }).then(function(response){
+               if(response.data.length == 0 || response.data == undefined){
+                scope.setValues();  
+               } else{ 
+                   debugger
+                   
+                    scope.setValues();
+                    var savedData = response.data;
+                    savedData.forEach(element =>{
+                        scope.Distritos.forEach(distrito =>{
+                            if(distrito.Correlativo == element.Distrito){
+                                distrito.numeroPlazas = element.NumeroPlazas, 
+                                distrito.canEdit = false;
+                            }
+                        })    
+                    })              
+               }
+           })    
         },
 
         getDepartamentos(){
@@ -176,7 +231,7 @@ export default {
         getMedidores(){
             var scope = this;
             var indicador = this.$session.get('Indicador');
-            debugger
+            
             this.$http.post('http://192.168.1.20:4000/api/medidores', 
             {
                 id_Indicador: indicador.id_Indicador
@@ -187,14 +242,15 @@ export default {
                         
                     scope.medidor = response.data[0]; 
                     
-                    debugger
+                    
                 }
             })
         }, 
 
         changeDepartamento(){
             var scope = this;
-            debugger
+            this.$session.set('departamento', this.departamentoSelected)
+            
             this.$http.post('http://192.168.1.20:4000/api/distrito',
             {
                 Id_Departamento: this.departamentoSelected
@@ -204,23 +260,36 @@ export default {
 
                 } else{
                     scope.mostrarDistritos = true;
-                    scope.Distritos = response.data;                    
+                    scope.Distritos = response.data;  
+                    scope.Distritos.forEach(element => {
+                        element.canEdit = true;
+                    });
+                    scope.getSavedData(); 
+                    
+                    
                 }
             });
 
+        },
+
+        setValues(){
+            this.Distritos.forEach(element=>{
+                element.numeroPlazas = 0;
+                element.canEdit= true;
+            })
         },
 
         onFileSelected (event) {
             const file = event.target.files[0];
 
             
-            debugger
+            
             //const formData = new FormData();
             //formData.append("my-file", file);
             this.$http.post('http://192.168.1.20:4000/api/upload', file)
             .then(function(response) {
                  
-                    debugger
+                    
                 
             })
         },
@@ -269,7 +338,8 @@ export default {
     watch: {
         periodoSelected: {
             handler: function(evt){
-                this.$session.set('Trimestre', periodoSelected);
+                this.$session.set('Trimestre', evt);
+                this.getSavedData();
             }
         }
 

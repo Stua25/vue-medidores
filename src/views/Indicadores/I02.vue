@@ -25,22 +25,26 @@
 
                     <b-field style="display: -webkit-inline-box;">
                         <b-radio-button v-model="periodoSelected"
-                        native-value="1">
+                        native-value="1"
+                        @click="getSavedData">
                             <span>1</span>
                         </b-radio-button>
 
                         <b-radio-button v-model="periodoSelected"
-                        native-value="2">        
+                        native-value="2"
+                        @click="getSavedData">        
                             <span>2</span>
                         </b-radio-button>
 
                         <b-radio-button v-model="periodoSelected"
-                        native-value="3">
+                        native-value="3"
+                        @click="getSavedData">
                             <span>3</span>
                         </b-radio-button>
 
                         <b-radio-button v-model="periodoSelected"
-                        native-value="4">
+                        native-value="4"
+                        @click="getSavedData">
                             <span>4</span>
                         </b-radio-button>
                     </b-field>
@@ -62,7 +66,7 @@
                 </div>
             </div> 
 
-            <div class="columns is-mobile" v-for="distrito in Distritos" 
+            <div v-if="mostrarDistritos" class="columns is-mobile" v-for="distrito in Distritos" 
                     :value="distrito.Correlativo" 
                     :key="distrito.Correlativo">
                 <div class="column is-11 is-offset-1">
@@ -73,16 +77,20 @@
 
                     <div class="columns is-mobile">
                         <div class="column is-half is-offset-one-quarter">
-                            <b-field label="Numero de Plazas del SINAE Cubiertas">
-                                <b-input v-model="name"></b-input>
-                            </b-field>
+                            {{medidor.Descripcion}}
+                            <b-input v-model="distrito.numeroPlazas" :readonly="!distrito.canEdit"></b-input>
                         </div>
                     </div> 
                     <div class="columns is-mobile">
                         <div class="column is-half is-offset-one-quarter">
                             <b-field label="Numero total de Plazas de trabajo del SINAE">
-                                <b-input v-model="name"></b-input>
+                                <b-input v-model="distrito.total" disabled></b-input>
                             </b-field>
+                        </div>
+                    </div>
+                    <div class="columns is-mobile">
+                        <div class="column is-half is-offset-one-quarter">
+                            <a class="button is-rounded" @click="saveData(distrito.Correlativo, distrito.numeroPlazas, medidor.id_medidor, periodoSelected, distrito.total)">Guardar</a>
                         </div>
                     </div>                    
                 </div>
@@ -120,13 +128,84 @@ export default {
             Departamentos: [],
             departamentoSelected: 0,
             Distritos: [],
+            medidor: [],
             fileToUpload: '',
+            mostrarDistritos: false,
 
         }
     }, 
 
     methods: {
+        saveData(idDistrito, numeroPlaza, id_medidor, periodo, total){
+            var dataToSave = {
+                distrito: idDistrito,
+                numeroPlaza: numeroPlaza,
+                medidor: id_medidor,
+                periodo: periodo,
+                User: this.$session.get('id_usuario'),
+                departamento: this.$session.get('departamento')
+            }
+           if(numeroPlaza >= total){
+            alert("El Numero de plaza es mayor al total de las plazas");
+                return;
+           }
+
+           if(this.periodoSelected == 0 ){
+               alert("No se selecciono el trimestre");
+               return;
+           } 
+
+           
+
+           this.$http.post('http://192.168.1.20:4000/api/saveNumPlaza', 
+           {
+               dataToSave: dataToSave
+           }).then(function(response){
+               if(response.data.length == 0 || response.data == undefined){
+
+               } else{
+                   var notification = response.data;
+                    
+               }
+
+           })
+        
+        },
+
+        getSavedData(){
+            var scope = this;
+            var indicador = this.$session.get('Indicador')
+            var data = {
+                indicador: indicador.id_Indicador,
+                trimestre: parseInt(this.$session.get('Trimestre')),
+                user: this.$session.get('id_usuario'), 
+                departamento: this.$session.get('departamento')
+            }
+            this.$http.post('http://192.168.1.20:4000/api/savedNumPlaza', 
+           {
+               data: data
+           }).then(function(response){
+               if(response.data.length == 0 || response.data == undefined){
+                scope.setValues();  
+               } else{ 
+                   debugger
+                   
+                    scope.setValues();
+                    var savedData = response.data;
+                    savedData.forEach(element =>{
+                        scope.Distritos.forEach(distrito =>{
+                            if(distrito.Correlativo == element.Distrito){
+                                distrito.numeroPlazas = element.NumeroPlazas, 
+                                distrito.canEdit = false;
+                            }
+                        })    
+                    })              
+               }
+           })    
+        },
+
         getDepartamentos(){
+            debugger
             var scope = this;
             this.$http.post('http://192.168.1.20:4000/api/departamentos', 
             {
@@ -140,34 +219,70 @@ export default {
             })
         }, 
 
-        changeDepartamento(){
+        
+        getMedidores(){
             var scope = this;
+            var indicador = this.$session.get('Indicador');
+            
+            this.$http.post('http://192.168.1.20:4000/api/medidores', 
+            {
+                id_Indicador: indicador.id_Indicador
+            }).then(function(response){
+                if(response.data.length == 0 || response.data == undefined){
+
+                } else{
+                        
+                    scope.medidor = response.data[0]; 
+                    
+                    
+                }
+            })
+        }, 
+
+        changeDepartamento(){
             debugger
+            var scope = this;
+            this.$session.set('departamento', this.departamentoSelected)
+            
             this.$http.post('http://192.168.1.20:4000/api/distrito',
             {
                 Id_Departamento: this.departamentoSelected
             }).then(function(response){
                 if(response.data.length == 0 || response.data == undefined){
+                    scope.mostrarDistritos =false;
 
                 } else{
-                    scope.Distritos = response.data;   
-                    debugger                     
+                    scope.mostrarDistritos = true;
+                    scope.Distritos = response.data;  
+                    scope.Distritos.forEach(element => {
+                        element.canEdit = true;
+                    });
+                    scope.getSavedData(); 
+                    
+                    
                 }
             });
 
+        },
+
+        setValues(){
+            this.Distritos.forEach(element=>{
+                element.numeroPlazas = 0;
+                element.canEdit= true;
+            })
         },
 
         onFileSelected (event) {
             const file = event.target.files[0];
 
             
-            debugger
+            
             //const formData = new FormData();
             //formData.append("my-file", file);
             this.$http.post('http://192.168.1.20:4000/api/upload', file)
             .then(function(response) {
                  
-                    debugger
+                    
                 
             })
         },
@@ -209,10 +324,17 @@ export default {
             break;
         }
         this.getDepartamentos();
+        this.getMedidores();
 
     },
 
     watch: {
+        periodoSelected: {
+            handler: function(evt){
+                this.$session.set('Trimestre', evt);
+                this.getSavedData();
+            }
+        }
 
     }
 }
