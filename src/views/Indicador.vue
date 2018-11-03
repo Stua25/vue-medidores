@@ -53,8 +53,7 @@ export default {
                 if(response.data.length == 0 || response.data == undefined){
 
                 } else{
-                    scope.indicadores = response.data;   
-                    debugger                     
+                    scope.indicadores = response.data;                
                 }
                 })
         }, 

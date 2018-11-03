@@ -2,6 +2,7 @@ const express = require('express'),
 path = require('path'),
 bodyParser = require('body-parser'),
 cors = require('cors');
+var upload = require('express-fileupload');
 
 
 
@@ -20,7 +21,7 @@ app.use(bodyParser.urlencoded({
   extended: true
 }));
 app.use(cors());
-
+app.use(upload())
 app.use(session({
     secret: 'aalkjdfasjd',
     resave: false,
@@ -32,6 +33,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use(express.static(path.join(__dirname, 'public')));
+
+// app.use(upload);
 
 
 //Routes
@@ -53,6 +56,7 @@ app.post('/logIng', (req, res) => {
         } 
       });
     });
+
 
 passport.serializeUser(function(user_id, done){
     done(null, user_id)

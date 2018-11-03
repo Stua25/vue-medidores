@@ -30,28 +30,31 @@
 
                     <b-field style="display: -webkit-inline-box;">
                         <b-radio-button v-model="periodoSelected"
-                        native-value="1"
+                        :native-value="1"
                         @click="getSavedData">
                             <span>1</span>
                         </b-radio-button>
 
                         <b-radio-button v-model="periodoSelected"
-                        native-value="2"
+                        :native-value="2"
                         @click="getSavedData">        
                             <span>2</span>
                         </b-radio-button>
 
                         <b-radio-button v-model="periodoSelected"
-                        native-value="3"
+                        :native-value="3"
                         @click="getSavedData">
                             <span>3</span>
                         </b-radio-button>
 
                         <b-radio-button v-model="periodoSelected"
-                        native-value="4"
+                        :native-value="4"
                         @click="getSavedData">
                             <span>4</span>
                         </b-radio-button>
+                        <span class="button" @click="doSomething">
+                           <font-awesome-icon icon="check-circle" style="margin-right: 15px; display: inline"/>
+                        </span>
                     </b-field>
                 </div>
             </div>
@@ -70,7 +73,6 @@
                     </b-select>
                 </div>
             </div> 
-
             <div v-if="mostrarDistritos" class="columns is-mobile" v-for="distrito in Distritos" 
                     :value="distrito.Correlativo" 
                     :key="distrito.Correlativo">
@@ -83,7 +85,7 @@
                     <div class="columns is-mobile">
                         <div class="column is-half is-offset-one-quarter">
                             {{medidor.Descripcion}}
-                            <b-input v-model="distrito.numeroPlazas" :readonly="!distrito.canEdit"></b-input>
+                            <b-input v-model="distrito.numeroPlazas"></b-input>
                         </div>
                     </div> 
                     <div class="columns is-mobile">
@@ -93,20 +95,31 @@
                             </b-field>
                         </div>
                     </div>
-                    <div class="columns is-mobile">
+                    <div v-if="distrito.canEdit" class="columns is-mobile">
                         <div class="column is-half is-offset-one-quarter">
                             <a class="button is-rounded" @click="saveData(distrito.Correlativo, distrito.numeroPlazas, medidor.id_medidor, periodoSelected, distrito.total)">Guardar</a>
                         </div>
-                    </div>                    
+                    </div>  
+                    <div v-else class="columns is-mobile">
+                        <div class="column is-half is-offset-one-quarter">
+                            <a class="button is-rounded" @click="editData(distrito.Correlativo, distrito.numeroPlazas, medidor.id_medidor, periodoSelected, distrito.total)">Editar</a>
+                        </div>
+                    </div>                  
                 </div>
             </div> 
             <div class="columns is-mobile">
                 <div class="column is-11 is-offset-1">
-                   <form enctype="multipart/form-data">
+                   <form @submit.prevent="upload" enctype="multipart/form-data">
                             <label>
                                 <font-awesome-icon icon="file-upload" />&nbsp;Seleccionar un archivo
-                                <input  type="file" accept=".pdf" @change="onFileSelected($event)">
+                                <input  type="file" accept=".pdf" name="filename" @change="fileChange($event.target.files)">
                             </label>
+                            <div class="columns is-mobile">
+                                <div class="column is-11 is-offset-1">
+                                    <input class="button" type="submit" value="Guardar Archivo">
+                                </div>
+                            </div>
+                            
                     </form>
                 </div>
             </div>
@@ -136,16 +149,29 @@ export default {
             medidor: [],
             fileToUpload: '',
             mostrarDistritos: false,
+            mostratTrimestre: false,
+            files: new FormData(),
+
+            savedData: [],
 
         }
     }, 
 
     methods: {
+        doSomething(){
+            this.periodoSelected = new Number(this.periodoSelected) ;
+            this.getSavedData();
+
+        },
+        fileChange(fileList) {
+            this.files.append("file", fileList[0], fileList[0].name);
+        },
 
         goBack(){
             this.$router.push('/indicadores')
         },
-        saveData(idDistrito, numeroPlaza, id_medidor, periodo, total){
+        editData(idDistrito, numeroPlaza, id_medidor, periodo, total){
+            var scope = this;
             var dataToSave = {
                 distrito: idDistrito,
                 numeroPlaza: numeroPlaza,
@@ -154,31 +180,83 @@ export default {
                 User: this.$session.get('id_usuario'),
                 departamento: this.$session.get('departamento')
             }
-           if(numeroPlaza >= total){
-            alert("El Numero de plaza es mayor al total de las plazas");
+           if(numeroPlaza >= total ){
+               this.$toast.open({
+                   message: 'El numero de la plaza deber ser menor al total de las plazas',
+                   type: 'is-danger'
+               })
+                return;
+           }
+           else {
+
+            this.$http.post('http://192.168.1.20:4000/api/editNumPlaza', 
+            {
+                dataToSave: dataToSave
+            }).then(function(response){
+                if(response.data.length == 0 || response.data == undefined){
+
+                } else{
+                    var notification = response.data;
+                    scope.$toast.open({
+                    message: 'Cambios Guardados',
+                    type: 'is-success'
+                })
+                    return;
+                        
+                }
+
+            })
+           }
+            
+        },
+
+        saveData(idDistrito, numeroPlaza, id_medidor, periodo, total){
+            var scope = this;
+            var dataToSave = {
+                distrito: idDistrito,
+                numeroPlaza: numeroPlaza,
+                medidor: id_medidor,
+                periodo: periodo,
+                User: this.$session.get('id_usuario'),
+                departamento: this.$session.get('departamento')
+            }
+           if(numeroPlaza >= total ){
+               this.$toast.open({
+                   message: 'El numero de la plaza deber ser menor al total de las plazas',
+                   type: 'is-danger'
+               })
                 return;
            }
 
-           if(this.periodoSelected == 0 ){
-               alert("No se selecciono el trimestre");
-               return;
+          else if(this.periodoSelected == 0 ){
+               this.$toast.open({
+                   message: 'Favor de Seleccionar un trimestre',
+                   type: 'is-danger'
+               })
+                return;
            } 
-
            
+           else {
 
-           this.$http.post('http://192.168.1.20:4000/api/saveNumPlaza', 
-           {
-               dataToSave: dataToSave
-           }).then(function(response){
-               if(response.data.length == 0 || response.data == undefined){
+            this.$http.post('http://192.168.1.20:4000/api/saveNumPlaza', 
+            {
+                dataToSave: dataToSave
+            }).then(function(response){
+                if(response.data.length == 0 || response.data == undefined){
 
-               } else{
-                   var notification = response.data;
-                    
-               }
+                } else{
+                    var notification = response.data;
+                    scope.$toast.open({
+                    message: 'Cambios Guardados',
+                    type: 'is-success'
+                })
+                    return;
+                        
+                }
 
-           })
-        
+            })
+           }
+            
         },
 
         getSavedData(){
@@ -251,6 +329,10 @@ export default {
             var scope = this;
             this.$session.set('departamento', this.departamentoSelected)
             
+            if(this.departamentoSelected != 0){
+                this.mostratTrimestre = true;
+            }
+            
             this.$http.post('http://192.168.1.20:4000/api/distrito',
             {
                 Id_Departamento: this.departamentoSelected
@@ -262,10 +344,9 @@ export default {
                     scope.mostrarDistritos = true;
                     scope.Distritos = response.data;  
                     scope.Distritos.forEach(element => {
+                        element.numeroPlazas = 0;
                         element.canEdit = true;
                     });
-                    scope.getSavedData(); 
-                    
                     
                 }
             });
@@ -279,18 +360,31 @@ export default {
             })
         },
 
-        onFileSelected (event) {
-            const file = event.target.files[0];
-
-            
-            
-            //const formData = new FormData();
-            //formData.append("my-file", file);
-            this.$http.post('http://192.168.1.20:4000/api/upload', file)
+        upload() {
+            debugger
+            var scope = this;
+            this.$http.post('http://192.168.1.20:4000/api/upload', this.files)
             .then(function(response) {
-                 
-                    
-                
+                if(response.data.length == 0 || response.data == undefined){
+                    scope.$toast.open({
+                        message: `Error al conectar intente de nuevo`,
+                        type: 'is-danger'
+                    })
+                } else{
+                    var status = response.data.status;
+                    debugger
+                    if(status == 'uploaded'){
+                        scope.$toast.open({
+                            message: `Archivo Guardado`,
+                            type: 'is-success'
+                        })
+                    } else{
+                        scope.$toast.open({
+                            message: `Error al Guardar el Archivo`,
+                            type: 'is-danger'
+                        })
+                    }
+                }
             })
         },
 
@@ -340,7 +434,9 @@ export default {
             handler: function(evt){
                 this.$session.set('Trimestre', evt);
                 this.getSavedData();
-            }
+
+            },
+            deep: true
         }
 
     }

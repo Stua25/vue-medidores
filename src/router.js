@@ -45,6 +45,11 @@ export default new Router({
       path: '/indicador/I02',
       name: 'IO2',
       component: () => import(/* webpackChunkName: "indicadores" */ './views/Indicadores/I02')
+    }, 
+    {
+      path: '/indicador/I03',
+      name: 'I03',
+      component: () => import(/* webpackChunkName: "indicadores" */ './views/Indicadores/I03')
     }
   ]
 })
